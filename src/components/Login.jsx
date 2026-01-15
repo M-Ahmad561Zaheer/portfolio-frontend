@@ -27,11 +27,10 @@ const Login = () => {
           navigate(`/${ADMIN_PATH}`);
         }, 1000);
       } 
-   } catch (err) {
-  console.error("Full Error Object:", err);
-  // Agar err.response nahi hai, toh matlab network/CORS block hai
-  alert(`Error: ${err.response?.data?.message || "Network/CORS Error"}`);
-} finally {
+   }  catch (err) {
+  console.error("Axios Error Details:", err.response); // Ye console mein check karein
+  alert(err.response?.data?.message || "Something went wrong!"); 
+}finally {
       setLoading(false);
     }
   };
