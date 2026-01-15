@@ -27,10 +27,11 @@ const Login = () => {
           navigate(`/${ADMIN_PATH}`);
         }, 1000);
       } 
-    } catch (err) {
-      console.error(err);
-      alert("Access Denied: Incorrect Protocol ❌");
-    } finally {
+   } catch (err) {
+  console.error("Full Error Object:", err);
+  // Agar err.response nahi hai, toh matlab network/CORS block hai
+  alert(`Error: ${err.response?.data?.message || "Network/CORS Error"}`);
+} finally {
       setLoading(false);
     }
   };
