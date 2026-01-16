@@ -19,18 +19,20 @@ const Login = () => {
     try {
       const res = await axios.post(`${API_URL}/auth/login`, { password });
 
-      if (res.data.success) {
-        console.log("Token received from backend:", res.data.adminKey);
-        localStorage.setItem("adminToken", res.data.adminKey);
-        // Chota sa delay for feel-good effect
-        setTimeout(() => {
-          navigate(`/${ADMIN_PATH}`);
-        }, 1000);
-      } 
+      // Login.jsx mein replace karein
+if (res.data.success) {
+    localStorage.setItem("adminToken", res.data.adminKey);
+    console.log("Redirecting to:", `/${ADMIN_PATH}`);
+    
+    // Alert laga kar check karein ke function yahan tak pohoncha
+    alert("Login Success! Moving to Dashboard..."); 
+    
+    navigate(`/${ADMIN_PATH.trim()}`); 
+}
    }  catch (err) {
   console.error("Axios Error Details:", err.response); // Ye console mein check karein
   alert(err.response?.data?.message || "Something went wrong!"); 
-}finally {
+}   finally {
       setLoading(false);
     }
   };
