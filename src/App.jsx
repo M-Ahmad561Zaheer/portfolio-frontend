@@ -43,14 +43,15 @@ function App() {
         <Route path="/login" element={<Login />} />
         
         {/* Protected Dashboard - Iska path secret .env wala hona chahiye */}
-        <Route 
-          path={`/${import.meta.env.VITE_ADMIN_PATH}`} 
-          element={
-            <ProtectedRoute>
-              <AdminDashboard />
-            </ProtectedRoute>
-          } 
-        />
+        {/* Protected Dashboard */}
+<Route 
+  path="/ahmad-secret-portal-786"  // Variable ki jagah direct likh dein
+  element={
+    <ProtectedRoute>
+      <AdminDashboard />
+    </ProtectedRoute>
+  } 
+/>
       </Routes>
     </Suspense>
   );
