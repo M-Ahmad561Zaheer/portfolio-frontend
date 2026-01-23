@@ -68,57 +68,41 @@ const AdminDashboard = () => {
 
 const handleSubmit = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem("adminToken"); // Token get karein
+    const token = localStorage.getItem("adminToken");
 
-    // TechStack logic
+    // 1. TechStack logic
     let finalData = { ...formData };
     if (finalData.techStack && typeof finalData.techStack === 'string') {
       finalData.techStack = finalData.techStack.split(',').map(item => item.trim());
     }
 
-    // Prepare Data
-    let dataToSend;
-    let headers = { 
-      'admin-secret-key': token // Har request mein token lazmi hai
+    // 2. Prepare JSON Data (FormData ko khatam kar dein)
+    const headers = { 
+      'Content-Type': 'application/json',
+      'admin-secret-key': token 
     };
 
-    if (type === 'projects') {
-      dataToSend = new FormData();
-      Object.keys(finalData).forEach(key => {
-        if (key === 'techStack') {
-          // Array ko stringify karke bhejien (backend pe split ho jayega)
-          dataToSend.append(key, finalData[key]); 
-        } else {
-          dataToSend.append(key, finalData[key]);
-        }
-      });
-      if (file) dataToSend.append('image', file);
-      
-      // FormData ke liye boundary auto-set hoti hai, bas token dein
-    } else {
-      dataToSend = finalData;
-    }
+    // Note: Ab hum 'file' state use nahi karenge, 
+    // balki formData.image mein image ka URL paste karenge.
 
     try {
       const url = `${API_URL}/${type}${editId ? `/${editId}` : ''}`;
       
       if (editId) {
-        await axios.put(url, dataToSend, { headers });
+        await axios.put(url, finalData, { headers });
       } else {
-        await axios.post(url, dataToSend, { headers });
+        await axios.post(url, finalData, { headers });
       }
 
       alert("Data Saved Successfully! ✅");
       setEditId(null); 
       setFormData({}); 
-      setFile(null); 
       fetchData();
     } catch (err) { 
       console.error("Submit Error:", err.response?.data || err.message);
-      alert(err.response?.data?.message || "Error saving data (401 Unauthorized?)"); 
+      alert(err.response?.data?.message || "Error saving data"); 
     }
 };
-
   useEffect(() => {
     fetchData();
   }, [type]);
@@ -311,13 +295,14 @@ const handleSubmit = async (e) => {
         </div>
       </div>
       <div className="space-y-1">
-        <label className="text-xs font-bold text-slate-500 uppercase ml-1">Project Image</label>
-        <input 
-          type="file" 
-          onChange={(e) => setFile(e.target.files[0])} 
-          className="w-full text-[10px] text-slate-500 p-2 bg-white/5 rounded-lg border border-white/10" 
-        />
-      </div>
+  <label className="text-xs font-bold text-slate-500 uppercase ml-1">Project Image URL</label>
+  <input 
+    className="w-full bg-[#050816] border border-white/10 p-4 rounded-xl text-sm outline-none" 
+    placeholder="https://i.postimg.cc/xyz.jpg"
+    value={formData.image || ''} 
+    onChange={(e) => setFormData({...formData, image: e.target.value})} 
+  />
+</div>
     </>
   ) : (
     <div className="space-y-1">
