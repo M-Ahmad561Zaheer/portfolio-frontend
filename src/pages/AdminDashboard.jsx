@@ -40,6 +40,7 @@ const AdminDashboard = () => {
       }
     };
     console.log("Using Token:", config.headers["admin-secret-key"]);
+    console.log(dataRes.data);
     // Console mein check karein ke URL aur Header sahi hain
     console.log("Fetching from:", `${API_URL}/${type}`);
 
