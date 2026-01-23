@@ -1,15 +1,35 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion'; 
-import { FiGithub, FiExternalLink, FiLoader } from 'react-icons/fi';
+import { FiGithub, FiExternalLink } from 'react-icons/fi';
 
-
+// 1. Skeleton Card Component (Loading ke waqt dikhane ke liye)
+const ProjectSkeleton = () => (
+  <div className="bg-[#0f172a]/50 border border-slate-800 rounded-[2.5rem] overflow-hidden animate-pulse">
+    <div className="h-60 bg-slate-800/40" />
+    <div className="p-8 space-y-5">
+      <div className="h-8 bg-slate-800 rounded-xl w-3/4" />
+      <div className="space-y-2">
+        <div className="h-4 bg-slate-800 rounded-md w-full" />
+        <div className="h-4 bg-slate-800 rounded-md w-5/6" />
+      </div>
+      <div className="flex gap-2 pt-2">
+        {[1, 2, 3].map(i => (
+          <div key={i} className="h-6 w-16 bg-slate-800/60 rounded-lg" />
+        ))}
+      </div>
+      <div className="flex gap-8 pt-6 border-t border-slate-800/50">
+        <div className="h-5 w-20 bg-slate-800 rounded-md" />
+        <div className="h-5 w-20 bg-slate-800 rounded-md" />
+      </div>
+    </div>
+  </div>
+);
 
 const Projects = () => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 1. API ke liye base URL
   const API_BASE_URL = import.meta.env.VITE_API_URL;
   const ASSET_URL = API_BASE_URL.replace('/api/v1', '');
 
@@ -21,11 +41,12 @@ const Projects = () => {
       } catch (err) { 
         console.error("Fetch Error:", err); 
       } finally {
-        setLoading(false);
+        // Thora sa extra delay taake animation smoothly khatam ho
+        setTimeout(() => setLoading(false), 500);
       }
     };
     fetchProjects();
-  }, []);
+  }, [API_BASE_URL]);
 
   const formatLink = (url) => {
     if (!url) return "#";
@@ -34,7 +55,6 @@ const Projects = () => {
 
   return (
     <section id="projects" className="min-h-screen py-24 bg-[#020617] text-white px-6 md:px-12">
-      {/* Header Section - Motion Used Here */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -50,15 +70,13 @@ const Projects = () => {
         </p>
       </motion.div>
 
-      {loading ? (
-        <div className="flex justify-center items-center py-20">
-          <FiLoader className="animate-spin text-4xl text-blue-500" />
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 max-w-7xl mx-auto">
-          {projects.length > 0 ? (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 max-w-7xl mx-auto">
+        {loading ? (
+          // Jab loading ho raha ho toh 6 Skeletons dikhao
+          [1, 2, 3, 4, 5, 6].map((item) => <ProjectSkeleton key={item} />)
+        ) : (
+          projects.length > 0 ? (
             projects.map((project, index) => (
-              /* Card Container - Motion Used Here */
               <motion.div
                 key={project._id}
                 initial={{ opacity: 0, y: 30 }}
@@ -71,11 +89,11 @@ const Projects = () => {
                 <div className="relative h-60 overflow-hidden">
                   <div className="absolute inset-0 bg-blue-600/5 group-hover:bg-transparent transition-colors z-10" />
                   <img 
-  src={project.image?.startsWith('http') ? project.image : `${ASSET_URL}${project.image}`} 
-  alt={project.title} 
-  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-  onError={(e) => { e.target.src = "https://placehold.co/600x400"; }} // Agar link toot jaye toh placeholder dikhaye
-/>
+                    src={project.image?.startsWith('http') ? project.image : `${ASSET_URL}${project.image}`} 
+                    alt={project.title} 
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    onError={(e) => { e.target.src = "https://placehold.co/600x400"; }}
+                  />
                 </div>
 
                 <div className="p-8">
@@ -121,9 +139,9 @@ const Projects = () => {
             <div className="col-span-full text-center py-20">
               <p className="text-slate-500 italic">No projects found. Add some from the admin dashboard.</p>
             </div>
-          )}
-        </div>
-      )}
+          )
+        )}
+      </div>
     </section>
   );
 };
