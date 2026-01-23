@@ -39,7 +39,7 @@ const AdminDashboard = () => {
         "admin-secret-key": String(token).trim() // Ensure no extra spaces
       }
     };
-
+    console.log("Using Token:", config.headers["admin-secret-key"]);
     // Console mein check karein ke URL aur Header sahi hain
     console.log("Fetching from:", `${API_URL}/${type}`);
 
