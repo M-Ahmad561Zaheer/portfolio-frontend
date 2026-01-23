@@ -71,10 +71,11 @@ const Projects = () => {
                 <div className="relative h-60 overflow-hidden">
                   <div className="absolute inset-0 bg-blue-600/5 group-hover:bg-transparent transition-colors z-10" />
                   <img 
-                    src={project.image ? `${ASSET_URL}${project.image}` : "https://placehold.co/600x400"} 
-                    alt={project.title} 
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
+  src={project.image?.startsWith('http') ? project.image : `${ASSET_URL}${project.image}`} 
+  alt={project.title} 
+  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+  onError={(e) => { e.target.src = "https://placehold.co/600x400"; }} // Agar link toot jaye toh placeholder dikhaye
+/>
                 </div>
 
                 <div className="p-8">
