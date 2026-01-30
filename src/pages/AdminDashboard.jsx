@@ -23,12 +23,11 @@ const AdminDashboard = () => {
 
   const API_URL = import.meta.env.VITE_API_URL;
 
- const fetchData = async () => {
+const fetchData = async () => {
   setLoading(true);
   try {
     const token = localStorage.getItem("adminToken");
     
-    // Agar token nahi mila toh request na bhein
     if (!token) {
       console.error("No token found in localStorage");
       return;
@@ -36,12 +35,11 @@ const AdminDashboard = () => {
 
     const config = {
       headers: {
-        "admin-secret-key": String(token).trim() // Ensure no extra spaces
+        "admin-secret-key": String(token).trim()
       }
     };
-    console.log("Using Token:", config.headers["admin-secret-key"]);
-    console.log(dataRes.data);
-    // Console mein check karein ke URL aur Header sahi hain
+
+    // --- FIX: Console logs ko axios ke BAAD ya variables ke BAAD rakhein ---
     console.log("Fetching from:", `${API_URL}/${type}`);
 
     const [dataRes, msgRes] = await Promise.all([
@@ -49,12 +47,15 @@ const AdminDashboard = () => {
       axios.get(`${API_URL}/messages`, config)
     ]);
 
-    // Data format handle karein (backend agar direct array bhej raha hai)
+    // Ab yahan dataRes use karein kyunke response aa chuka hai
+    console.log("Data Received:", dataRes.data);
+
     setItems(Array.isArray(dataRes.data) ? dataRes.data : dataRes.data.data || []);
     setMessages(Array.isArray(msgRes.data) ? msgRes.data : msgRes.data.messages || []);
 
   } catch (err) {
-    console.error("Fetch Error Detail:", err.response?.status, err.response?.data);
+    // Isse aapko sahi error nazar ayega console mein
+    console.error("Fetch Error Detail:", err.response?.status, err.response?.data || err.message);
     if(err.response?.status === 401) {
        alert("Authorization Failed! Token mismatch.");
     }
