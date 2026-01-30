@@ -48,14 +48,14 @@ const fetchData = async () => {
     ]);
 
     // Ab yahan dataRes use karein kyunke response aa chuka hai
-    console.log("Data Received:", dataRes.data);
+    //console.log("Data Received:", dataRes.data);
 
     setItems(Array.isArray(dataRes.data) ? dataRes.data : dataRes.data.data || []);
     setMessages(Array.isArray(msgRes.data) ? msgRes.data : msgRes.data.messages || []);
 
   } catch (err) {
     // Isse aapko sahi error nazar ayega console mein
-    console.error("Fetch Error Detail:", err.response?.status, err.response?.data || err.message);
+    //console.error("Fetch Error Detail:", err.response?.status, err.response?.data || err.message);
     if(err.response?.status === 401) {
        alert("Authorization Failed! Token mismatch.");
     }
@@ -101,7 +101,7 @@ const handleSubmit = async (e) => {
       setFormData({}); 
       fetchData();
     } catch (err) { 
-      console.error("Submit Error:", err.response?.data || err.message);
+      //console.error("Submit Error:", err.response?.data || err.message);
       alert(err.response?.data?.message || "Error saving data"); 
     }
 };
@@ -120,7 +120,7 @@ const handleSubmit = async (e) => {
       });
       fetchData();
     } catch (err) {
-      console.error("Delete Error:", err);
+      //console.error("Delete Error:", err);
       alert("Delete failed");
     }
   }
@@ -151,7 +151,7 @@ const handleSubmit = async (e) => {
       setReplyText("");
       fetchData(); // List refresh karein taake status update ho jaye
     } catch (err) {
-      console.error("Reply Error:", err.response?.data || err.message);
+      //console.error("Reply Error:", err.response?.data || err.message);
       alert(err.response?.data?.message || "Failed to send reply. Auth issue?");
     } finally {
       setSendingReply(false);
