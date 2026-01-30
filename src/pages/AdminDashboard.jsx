@@ -40,7 +40,7 @@ const fetchData = async () => {
     };
 
     // --- FIX: Console logs ko axios ke BAAD ya variables ke BAAD rakhein ---
-    console.log("Fetching from:", `${API_URL}/${type}`);
+    //console.log("Fetching from:", `${API_URL}/${type}`);
 
     const [dataRes, msgRes] = await Promise.all([
       axios.get(`${API_URL}/${type}`, config),

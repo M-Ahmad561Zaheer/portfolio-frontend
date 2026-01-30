@@ -22,7 +22,7 @@ const Login = () => {
       // Login.jsx mein replace karein
 if (res.data.success) {
     localStorage.setItem("adminToken", res.data.adminKey);
-    console.log("Redirecting to:", `/${ADMIN_PATH}`);
+    //console.log("Redirecting to:", `/${ADMIN_PATH}`);
     
     // Alert laga kar check karein ke function yahan tak pohoncha
     alert("Login Success! Moving to Dashboard..."); 
