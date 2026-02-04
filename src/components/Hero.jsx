@@ -66,13 +66,14 @@ const Hero = () => {
           
           {/* Action: Open CV in new tab */}
           <a 
-            href="/frontend/public/Muhammad Ahmad Zaheer_CV.pdf" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="bg-slate-900 hover:bg-slate-800 text-white border border-slate-700 px-8 py-4 rounded-2xl font-bold transition-all flex items-center gap-2 shadow-lg cursor-pointer active:scale-95"
-          >
-            Download CV <FiDownload />
-          </a>
+  href="/Muhammad Ahmad Zaheer_CV.pdf" // 'frontend/public' nikal dein
+  target="_blank" 
+  rel="noopener noreferrer"
+  download // Ye lazmi add karein taake direct download ho
+  className="bg-slate-900 hover:bg-slate-800 text-white border border-slate-700 px-8 py-4 rounded-2xl font-bold transition-all flex items-center gap-2 shadow-lg cursor-pointer active:scale-95"
+>
+  Download CV <FiDownload />
+</a>
         </motion.div>
 
         {/* Social Links */}
