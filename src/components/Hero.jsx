@@ -66,7 +66,7 @@ const Hero = () => {
           
           {/* Action: Open CV in new tab */}
           <a 
-            href="/Muhammad Ahmad Zaheer_CV.pdf" 
+            href="/frontend//" 
             target="_blank" 
             rel="noopener noreferrer"
             className="bg-slate-900 hover:bg-slate-800 text-white border border-slate-700 px-8 py-4 rounded-2xl font-bold transition-all flex items-center gap-2 shadow-lg cursor-pointer active:scale-95"
