@@ -7,9 +7,15 @@ import {
   FiCheckCircle, FiTrendingUp, FiLayers, FiSend, FiX, FiMenu 
 } from 'react-icons/fi';
 
+// Global API instance (Best Practice)
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+  withCredentials: true 
+});
+
 const AdminDashboard = () => {
   const [type, setType] = useState('projects');
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({}); 
   const [items, setItems] = useState([]);
   const [messages, setMessages] = useState([]);
   const [editId, setEditId] = useState(null);
@@ -17,30 +23,28 @@ const AdminDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-
   const [replyId, setReplyId] = useState(null);
   const [replyText, setReplyText] = useState("");
   const [sendingReply, setSendingReply] = useState(false);
 
-  const API_URL = import.meta.env.VITE_API_URL;
-  const token = localStorage.getItem("adminToken");
-
-  // Fetch Data Function
+  // 1. Fetch Data
   const fetchData = async () => {
-    if (!token) return;
     setLoading(true);
     try {
-      const config = { headers: { "admin-secret-key": String(token).trim() } };
-      
       const [dataRes, msgRes] = await Promise.all([
-        axios.get(`${API_URL}/${type}`, config),
-        axios.get(`${API_URL}/messages`, config)
+        api.get(`/${type}`),
+        api.get(`/messages`)
       ]);
 
       setItems(Array.isArray(dataRes.data) ? dataRes.data : dataRes.data.data || []);
       setMessages(Array.isArray(msgRes.data) ? msgRes.data : msgRes.data.messages || []);
     } catch (err) {
-      if(err.response?.status === 401) alert("Session Expired or Unauthorized!");
+      console.error("Fetch Error:", err);
+      // Agar cookie expire ho jaye toh automatic logout/alert
+      if(err.response?.status === 401) {
+        alert("Session Expired! Login again.");
+        window.location.href = "/login";
+      }
     } finally {
       setLoading(false);
     }
@@ -49,12 +53,12 @@ const AdminDashboard = () => {
   useEffect(() => {
     fetchData();
     setEditId(null);
-    setFormData({});
+    setFormData({}); // Reset form when switching tabs
   }, [type]);
 
+  // 2. Handle Edit
   const handleEdit = (item) => {
     setEditId(item._id);
-    // Convert techStack array to string for input field
     const formattedItem = { ...item };
     if (Array.isArray(formattedItem.techStack)) {
       formattedItem.techStack = formattedItem.techStack.join(', ');
@@ -63,56 +67,49 @@ const AdminDashboard = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // 3. Handle Submit (Refined)
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
+    // Deep copy to avoid mutating state
     let finalData = { ...formData };
     
-    // Convert TechStack string back to Array
+    // TechStack string to Array conversion
     if (finalData.techStack && typeof finalData.techStack === 'string') {
       finalData.techStack = finalData.techStack.split(',').map(item => item.trim());
     }
-
-    // 1. Projects ke liye TechStack Array convert karein
-    if (type === 'projects' && finalData.techStack && typeof finalData.techStack === 'string') {
-        finalData.techStack = finalData.techStack.split(',').map(item => item.trim());
-    }
-
-    // 2. Reviews ke liye rating ko Number mein convert karein
+    
+    // Rating string to Number
     if (type === 'reviews' && finalData.rating) {
-        finalData.rating = Number(finalData.rating);
+      finalData.rating = Number(finalData.rating);
     }
-
-    const config = { withCredentials: true };
 
     try {
-      const url = `${API_URL}/${type}${editId ? `/${editId}` : ''}`;
       if (editId) {
-        await axios.put(url, finalData, config);
+        await api.put(`/${type}/${editId}`, finalData); 
       } else {
-        await axios.post(url, finalData, config);
+        await api.post(`/${type}`, finalData);
       }
+      
       alert("Success! Database Updated ✅");
       setEditId(null); 
       setFormData({}); 
       fetchData();
     } catch (err) { 
       alert(err.response?.data?.message || "Error saving data"); 
+    } finally {
+      setLoading(false);
     }
   };
 
+  // 4. Delete & Reply
   const handleDelete = async (id, deleteType = type) => {
-    if (window.confirm("Permanent Delete? This cannot be undone.")) {
+    if (window.confirm("Permanent Delete?")) {
       try {
-        await axios.delete(`${API_URL}/${deleteType}/${id}`, {
-          headers: { 'admin-secret-key': token }
-        });
+        await api.delete(`/${deleteType}/${id}`);
         fetchData();
-      } catch (err) {
-        console.error(err);
-        alert("Delete failed");
-      }
+      } catch (err) { alert("Delete failed"); }
     }
   };
 
@@ -120,19 +117,25 @@ const AdminDashboard = () => {
     if (!replyText) return alert("Write something!");
     setSendingReply(true);
     try {
-      await axios.post(`${API_URL}/messages/reply`, 
-        { id, to: email, subject: `Re: ${subject}`, message: replyText }, 
-        { headers: { 'admin-secret-key': token } }
-      );
+      await api.post(`/messages/reply`, { 
+        id, to: email, subject: `Re: ${subject}`, message: replyText 
+      });
       alert("Email Dispatched! 📧");
       setReplyId(null);
       setReplyText("");
       fetchData();
+    } catch (err) { alert("Failed to send reply."); }
+    finally { setSendingReply(false); }
+  };
+
+  // 5. Logout
+  const handleLogout = async () => {
+    try {
+      await api.post('/auth/logout');
+      localStorage.removeItem("isAdminAuthenticated");
+      window.location.href = "/login";
     } catch (err) {
-      console.error(err);
-      alert("Failed to send reply.");
-    } finally {
-      setSendingReply(false);
+      console.error("Logout failed", err);
     }
   };
 
