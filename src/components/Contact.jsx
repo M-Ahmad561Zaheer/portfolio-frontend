@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { motion } from 'framer-motion';
-import { FiSend, FiMail, FiMapPin, FiCheckCircle, FiLoader } from 'react-icons/fi';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FiSend, FiMail, FiMapPin, FiCheckCircle, FiLoader, FiAlertCircle } from 'react-icons/fi';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 const Contact = () => {
-  const [formData, setFormData] = useState({ name: '', email: '', subject: 'AZ Developers', message: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', subject: 'Portfolio Inquiry', message: '' });
   const [status, setStatus] = useState({ loading: false, success: false, error: null });
 
   const handleSubmit = async (e) => {
@@ -15,23 +15,27 @@ const Contact = () => {
 
     try {
       const res = await axios.post(`${API_URL}/contact`, formData);
-      if (res.status === 200) {
+      if (res.status === 200 || res.status === 201) {
         setStatus({ loading: false, success: true, error: null });
         setFormData({ name: '', email: '', subject: 'Portfolio Inquiry', message: '' });
+        // Success message disappears after 5 seconds
         setTimeout(() => setStatus(prev => ({ ...prev, success: false })), 5000);
       }
     } catch (err) {
-      setStatus({ loading: false, success: false, error: err.response?.data?.message || "Something went wrong" });
+      setStatus({ 
+        loading: false, 
+        success: false, 
+        error: err.response?.data?.message || "Server connection failed. Try again later." 
+      });
     }
   };
 
   return (
-    // Py-16 for mobile, py-24 for desktop
-    <section id="contact" className="py-16 md:py-24 bg-[#020617] px-4 md:px-6 relative overflow-hidden">
-      {/* Background Decorative Blur - Adjusted size for mobile */}
-      <div className="absolute top-0 right-0 w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-blue-600/5 blur-[80px] md:blur-[120px] rounded-full -z-10" />
+    <section id="contact" className="py-16 md:py-32 bg-[#020617] px-4 md:px-6 relative overflow-hidden">
+      {/* Background Decorative Blur */}
+      <div className="absolute top-0 right-0 w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-blue-600/10 blur-[100px] md:blur-[150px] rounded-full -z-10 animate-pulse" />
 
-      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-center">
+      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-20 items-center">
         
         {/* Left Side: Text & Info */}
         <motion.div 
@@ -39,103 +43,111 @@ const Contact = () => {
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center md:text-left" // Mobile pe text center kar diya
+          className="text-center md:text-left"
         >
-          {/* Text size adjusted: text-3xl for mobile, text-6xl for desktop */}
-          <h2 className="text-3xl sm:text-4xl md:text-6xl font-black text-white mb-4 md:mb-6 leading-tight">
-            Let's build something <span className="bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">Great.</span>
+          <div className="inline-block px-4 py-1.5 mb-6 rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-400 text-xs font-bold uppercase tracking-[0.2em]">
+            Get In Touch
+          </div>
+          <h2 className="text-4xl sm:text-5xl md:text-7xl font-black text-white mb-6 leading-[1.1]">
+            Let's build something <br />
+            <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-emerald-400 bg-clip-text text-transparent">
+              Extraordinary.
+            </span>
           </h2>
-          <p className="text-slate-400 text-base md:text-lg mb-8 md:10 max-w-md mx-auto md:mx-0">
-            I'm currently open for new projects, collaborations, or just a friendly hello.
+          <p className="text-slate-400 text-base md:text-xl mb-10 max-w-md mx-auto md:mx-0 leading-relaxed">
+            Have a project in mind or just want to say hi? My inbox is always open for interesting ideas.
           </p>
           
-          <div className="space-y-6 md:space-y-8 inline-block md:block text-left">
-            <div className="flex items-center gap-4 md:gap-5 group">
-              <div className="w-12 h-12 md:w-14 md:h-14 bg-slate-900 flex items-center justify-center rounded-xl md:rounded-2xl border border-slate-800 group-hover:border-blue-500/50 transition-all duration-300 shadow-xl">
-                <FiMail className="text-blue-400 text-lg md:text-xl"/>
+          <div className="space-y-6 text-left max-w-sm mx-auto md:mx-0">
+            {[
+              { icon: <FiMail />, title: 'Email Me', value: 'ahmedzaheer2004.24@gmail.com', color: 'text-blue-400', bg: 'border-blue-500/20' },
+              { icon: <FiMapPin />, title: 'Location', value: 'Lahore, Pakistan', color: 'text-emerald-400', bg: 'border-emerald-500/20' }
+            ].map((info, i) => (
+              <div key={i} className="flex items-center gap-5 group">
+                <div className={`w-14 h-14 bg-slate-900 flex items-center justify-center rounded-2xl border border-slate-800 group-hover:${info.bg} transition-all duration-300 shadow-xl`}>
+                  <span className={`${info.color} text-xl`}>{info.icon}</span>
+                </div>
+                <div>
+                  <p className="text-[10px] text-slate-500 uppercase tracking-widest font-black mb-1">{info.title}</p>
+                  <p className="text-white font-semibold text-base md:text-lg break-all">{info.value}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-[10px] md:text-xs text-slate-500 uppercase tracking-widest font-bold mb-0.5 md:mb-1">Email Me</p>
-                <p className="text-white font-medium text-base md:text-lg break-all">ahmedzaheer2004.24@gmail.com</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4 md:gap-5 group">
-              <div className="w-12 h-12 md:w-14 md:h-14 bg-slate-900 flex items-center justify-center rounded-xl md:rounded-2xl border border-slate-800 group-hover:border-emerald-500/50 transition-all duration-300 shadow-xl">
-                <FiMapPin className="text-emerald-400 text-lg md:text-xl"/>
-              </div>
-              <div>
-                <p className="text-[10px] md:text-xs text-slate-500 uppercase tracking-widest font-bold mb-0.5 md:mb-1">Location</p>
-                <p className="text-white font-medium text-base md:text-lg">Lahore, Pakistan</p>
-              </div>
-            </div>
+            ))}
           </div>
         </motion.div>
 
         {/* Right Side: Form */}
         <motion.div 
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="relative w-full"
+          className="relative"
         >
-          {/* Reduced padding on mobile (p-6) */}
           <form 
             onSubmit={handleSubmit}
-            className="bg-[#0f172a]/80 backdrop-blur-xl p-6 md:p-10 rounded-[1.5rem] md:rounded-[2.5rem] border border-slate-800 shadow-2xl space-y-4 md:space-y-5"
+            className="bg-slate-900/40 backdrop-blur-3xl p-6 md:p-12 rounded-[2rem] border border-white/5 shadow-2xl space-y-5"
           >
-            <div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <input 
                 required
                 type="text"
-                placeholder="Your Name" 
+                placeholder="Full Name" 
                 value={formData.name}
                 onChange={(e) => setFormData({...formData, name: e.target.value})}
-                className="w-full bg-[#1e293b]/50 border border-slate-700 p-3.5 md:p-4 rounded-xl md:rounded-2xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all text-white text-sm md:text-base" 
+                className="w-full bg-slate-800/50 border border-slate-700/50 p-4 rounded-2xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all text-white placeholder:text-slate-500" 
               />
-            </div>
-            <div>
               <input 
                 required
                 type="email"
                 placeholder="Email Address" 
                 value={formData.email}
                 onChange={(e) => setFormData({...formData, email: e.target.value})}
-                className="w-full bg-[#1e293b]/50 border border-slate-700 p-3.5 md:p-4 rounded-xl md:rounded-2xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all text-white text-sm md:text-base" 
+                className="w-full bg-slate-800/50 border border-slate-700/50 p-4 rounded-2xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all text-white placeholder:text-slate-500" 
               />
             </div>
-            <div>
-              <textarea 
-                required
-                placeholder="Tell me about your project..." 
-                rows="4" 
-                value={formData.message}
-                onChange={(e) => setFormData({...formData, message: e.target.value})}
-                className="w-full bg-[#1e293b]/50 border border-slate-700 p-3.5 md:p-4 rounded-xl md:rounded-2xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all text-white resize-none text-sm md:text-base"
-              ></textarea>
-            </div>
+            
+            <textarea 
+              required
+              placeholder="Your Message..." 
+              rows="5" 
+              value={formData.message}
+              onChange={(e) => setFormData({...formData, message: e.target.value})}
+              className="w-full bg-slate-800/50 border border-slate-700/50 p-4 rounded-2xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all text-white resize-none placeholder:text-slate-500"
+            ></textarea>
 
             <button 
               disabled={status.loading}
-              className={`w-full py-3.5 md:py-4 rounded-xl md:rounded-2xl font-bold flex items-center justify-center gap-3 transition-all duration-300 shadow-lg ${
+              className={`w-full py-4 rounded-2xl font-black uppercase tracking-widest text-sm flex items-center justify-center gap-3 transition-all duration-500 ${
                 status.success 
-                ? 'bg-emerald-600 text-white' 
-                : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-900/20'
-              }`}
+                ? 'bg-emerald-500 text-white shadow-emerald-500/20' 
+                : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-500/25 hover:-translate-y-1'
+              } disabled:opacity-70 disabled:cursor-not-allowed`}
             >
               {status.loading ? (
                 <FiLoader className="animate-spin text-xl" />
               ) : status.success ? (
-                <><FiCheckCircle className="text-xl" /> Message Sent!</>
+                <motion.div initial={{scale:0}} animate={{scale:1}} className="flex items-center gap-2">
+                  <FiCheckCircle className="text-xl" /> Sent Successfully
+                </motion.div>
               ) : (
-                <><FiSend /> Send Message</>
+                <><FiSend className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" /> Send Message</>
               )}
             </button>
 
-            {status.error && (
-              <p className="text-red-400 text-xs md:text-sm text-center font-medium mt-2">{status.error}</p>
-            )}
+            {/* Error Message with Animation */}
+            <AnimatePresence>
+              {status.error && (
+                <motion.div 
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  className="flex items-center justify-center gap-2 text-red-400 text-sm font-medium pt-2"
+                >
+                  <FiAlertCircle /> {status.error}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </form>
         </motion.div>
       </div>

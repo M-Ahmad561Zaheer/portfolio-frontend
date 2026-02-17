@@ -9,6 +9,7 @@ import Education from './components/Education';
 import Experience from './components/Experience';
 import Projects from './components/Projects';
 import Contact from './components/Contact';
+import Testimonials from './components/Testimonials';
 import Login from './components/Login';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -25,7 +26,9 @@ const Home = () => (
       <section id="experience"><Experience /></section>
       <section id="projects"><Projects /></section>
       <section id="education"><Education /></section>
+      <section id="testimonials"><Testimonials /></section>
       <section id="contact"><Contact /></section>
+      
     </main>
 
     <footer className="relative bg-[#050816] pt-20 pb-10 overflow-hidden border-t border-white/5">

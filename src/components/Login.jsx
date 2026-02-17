@@ -72,6 +72,21 @@ const Login = () => {
               <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-400 transition-colors">
                 <Lock size={18} />
               </div>
+              {/* Hidden username field for accessibility/browser autofill */}
+<input 
+  type="text" 
+  name="username" 
+  value="admin" 
+  readOnly 
+  style={{ display: 'none' }} 
+  autoComplete="username" 
+/>
+
+<input 
+  type={showPassword ? "text" : "password"} 
+  autoComplete="current-password"
+  // ... baaki props
+/>
               
               <input 
                 type={showPassword ? "text" : "password"} 
