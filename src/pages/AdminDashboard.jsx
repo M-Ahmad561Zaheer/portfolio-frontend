@@ -84,7 +84,7 @@ const AdminDashboard = () => {
         finalData.rating = Number(finalData.rating);
     }
 
-    const config = { headers: { 'admin-secret-key': token } };
+    const config = { withCredentials: true };
 
     try {
       const url = `${API_URL}/${type}${editId ? `/${editId}` : ''}`;
