@@ -15,17 +15,22 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    if (loading) return; // Double click prevention
+    if (loading) return;
 
     setLoading(true);
     try {
-      // Logic same: Backend ko password bhej rahe hain
-      const { data } = await axios.post(`${API_URL}/auth/login`, { password });
+      // 1. Backend ko request bhej rahe hain withCredentials ke sath
+      const { data } = await axios.post(
+        `${API_URL}/auth/login`, 
+        { password },
+        { withCredentials: true } // ✅ Ye cookies set karne ke liye lazmi hai
+      );
 
       if (data.success) {
-        localStorage.setItem("adminToken", data.adminKey);
+        // 2. localStorage ki ab zaroorat nahi kyunki cookie browser mein khud save ho jayegi
+        // Lekin agar aapka ProtectedRoute 'adminToken' check karta hai, toh bas true set kar dein
+        localStorage.setItem("isAdminAuthenticated", "true"); 
         
-        // Clean navigation with trim to avoid whitespace errors
         const targetPath = `/${ADMIN_PATH?.trim() || 'dashboard'}`;
         navigate(targetPath);
       }
