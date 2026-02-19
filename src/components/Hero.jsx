@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+
 import { FiDownload, FiArrowRight, FiGithub, FiLinkedin } from 'react-icons/fi';
 
 const Hero = () => {
@@ -64,10 +65,10 @@ const Hero = () => {
           </a>
           
           <a 
-            href="/Muhammad Ahmad Zaheer_CV.pdf" 
+            href="/Ahmad_CV.pdf"  /* ✅ Direct public folder se access */
             target="_blank" 
             rel="noopener noreferrer"
-            download
+            download="Ahmad_CV.pdf" 
             className="bg-slate-900 hover:bg-slate-800 text-white border border-white/10 px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-sm transition-all flex items-center justify-center gap-2 shadow-lg cursor-pointer active:scale-95"
           >
             Download CV <FiDownload className="group-hover:translate-y-0.5 transition-transform" />
