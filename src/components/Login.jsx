@@ -19,24 +19,19 @@ const Login = () => {
 
     setLoading(true);
     try {
-      // 1. Backend ko request bhej rahe hain withCredentials ke sath
       const { data } = await axios.post(
         `${API_URL}/auth/login`, 
         { password },
-        { withCredentials: true } // ✅ Ye cookies set karne ke liye lazmi hai
+        { withCredentials: true } 
       );
 
       if (data.success) {
-        // 2. localStorage ki ab zaroorat nahi kyunki cookie browser mein khud save ho jayegi
-        // Lekin agar aapka ProtectedRoute 'adminToken' check karta hai, toh bas true set kar dein
         localStorage.setItem("isAdminAuthenticated", "true"); 
-        
         const targetPath = `/${ADMIN_PATH?.trim() || 'dashboard'}`;
         navigate(targetPath);
       }
     } catch (err) {
       const errorMsg = err.response?.data?.message || "Grid Connection Failed!";
-      console.error("Auth Protocol Error:", err.response);
       alert(errorMsg);
     } finally {
       setLoading(false);
@@ -45,59 +40,57 @@ const Login = () => {
 
   return (
     <div className="h-screen bg-[#020617] flex items-center justify-center p-4 overflow-hidden relative">
-      {/* Dynamic Background Elements */}
-      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10" />
-      <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-blue-600/20 blur-[150px] rounded-full" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-indigo-900/20 blur-[150px] rounded-full" />
+      {/* --- WOW FACTOR: Carbon Fibre & Pulse Background --- */}
+      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 pointer-events-none" />
+      <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-purple-600/10 blur-[150px] rounded-full" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-indigo-900/10 blur-[150px] rounded-full" />
 
       <motion.div 
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
         className="relative z-10 w-full max-w-md"
       >
-        <div className="bg-[#0b1120]/60 backdrop-blur-2xl p-10 rounded-[2.5rem] border border-white/5 shadow-2xl">
+        <div className="bg-[#0b1120]/60 backdrop-blur-3xl p-10 rounded-[2.5rem] border border-white/5 shadow-2xl relative overflow-hidden">
+          {/* Subtle Scanning Light Effect */}
+          <motion.div 
+            animate={{ y: [0, 400, 0] }}
+            transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+            className="absolute top-0 left-0 w-full h-[1px] bg-purple-500/20 z-0"
+          />
           
           {/* Header Section */}
-          <div className="text-center mb-10">
-            <div className="inline-flex bg-blue-600/10 p-4 rounded-3xl border border-blue-500/20 mb-6 relative group">
-              <div className="absolute inset-0 bg-blue-500/20 blur-xl group-hover:blur-2xl transition-all" />
-              <ShieldCheck className="text-blue-400 w-12 h-12 relative z-10" />
-            </div>
-            <h2 className="text-4xl font-extrabold tracking-tight text-white mb-2">
+          <div className="text-center mb-10 relative z-10">
+            <motion.div 
+              whileHover={{ rotateY: 180 }}
+              transition={{ duration: 0.8 }}
+              className="inline-flex bg-purple-600/10 p-4 rounded-3xl border border-purple-500/20 mb-6 relative group cursor-help"
+            >
+              <div className="absolute inset-0 bg-purple-500/20 blur-xl group-hover:blur-2xl transition-all" />
+              <ShieldCheck className="text-purple-400 w-12 h-12 relative z-10" />
+            </motion.div>
+            <h2 className="text-4xl font-black tracking-tighter text-white mb-2 uppercase">
               Core Admin
             </h2>
-            <p className="text-slate-400 text-sm font-medium flex items-center justify-center gap-2">
-              <Cpu size={14} className="text-blue-500" /> System Authentication Required
+            <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-2">
+              <Cpu size={12} className="text-purple-500 animate-pulse" /> System Auth Protocol
             </p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-6">
+          <form onSubmit={handleLogin} className="space-y-6 relative z-10">
             <div className="relative group">
-              <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-400 transition-colors">
+              <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-purple-400 transition-colors">
                 <Lock size={18} />
               </div>
-              {/* Hidden username field for accessibility/browser autofill */}
-<input 
-  type="text" 
-  name="username" 
-  value="admin" 
-  readOnly 
-  style={{ display: 'none' }} 
-  autoComplete="username" 
-/>
-
-<input 
-  type={showPassword ? "text" : "password"} 
-  autoComplete="current-password"
-  // ... baaki props
-/>
               
+              {/* Accessibility inputs for browser autofill */}
+              <input type="text" name="username" value="admin" readOnly className="hidden" autoComplete="username" />
+
               <input 
                 type={showPassword ? "text" : "password"} 
                 autoComplete="current-password"
-                placeholder="ACCESS CODE" 
-                className="w-full bg-[#050816]/80 border border-white/5 p-5 pl-14 pr-14 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/50 transition-all text-white placeholder:text-slate-700 font-mono tracking-[0.3em] text-sm"
+                placeholder="ENTER ACCESS CODE" 
+                className="w-full bg-[#050816]/80 border border-white/5 p-5 pl-14 pr-14 rounded-2xl outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50 transition-all text-white placeholder:text-slate-800 font-mono tracking-[0.3em] text-sm"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -113,11 +106,11 @@ const Login = () => {
             </div>
 
             <motion.button 
-              whileHover={{ scale: 1.01, boxShadow: "0 0 20px rgba(37, 99, 235, 0.4)" }}
+              whileHover={{ scale: 1.02, boxShadow: "0 0 30px rgba(168, 85, 247, 0.3)" }}
               whileTap={{ scale: 0.98 }}
               disabled={loading}
               type="submit" 
-              className="w-full bg-gradient-to-br from-blue-600 to-indigo-700 py-5 rounded-2xl font-black text-xs tracking-[0.2em] text-white flex items-center justify-center gap-3 disabled:opacity-50 transition-all"
+              className="w-full bg-gradient-to-br from-purple-600 to-indigo-700 py-5 rounded-2xl font-black text-xs tracking-[0.3em] text-white flex items-center justify-center gap-3 disabled:opacity-50 transition-all shadow-xl shadow-purple-900/20"
             >
               {loading ? (
                 <Loader2 className="animate-spin" size={20} />
@@ -128,14 +121,19 @@ const Login = () => {
           </form>
 
           {/* Footer Decoration */}
-          <div className="mt-10 pt-8 border-t border-white/5 flex flex-col items-center gap-4">
+          <div className="mt-10 pt-8 border-t border-white/5 flex flex-col items-center gap-4 relative z-10">
              <div className="flex gap-1.5">
                 {[1, 2, 3].map(i => (
-                  <div key={i} className={`h-1 w-8 rounded-full ${i===1 ? 'bg-blue-600' : 'bg-slate-800'}`} />
+                  <motion.div 
+                    key={i} 
+                    animate={{ opacity: [0.3, 1, 0.3] }}
+                    transition={{ duration: 2, delay: i * 0.3, repeat: Infinity }}
+                    className={`h-1.5 w-8 rounded-full ${i===1 ? 'bg-purple-600' : 'bg-slate-800'}`} 
+                  />
                 ))}
              </div>
-             <span className="text-[10px] text-slate-600 font-bold uppercase tracking-widest">
-                Nodes Encrypted: 256-Bit SSL
+             <span className="text-[9px] text-slate-600 font-black uppercase tracking-[0.2em]">
+                Encryption Level: AES-256-GCM
              </span>
           </div>
         </div>
@@ -144,7 +142,7 @@ const Login = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1 }}
-          className="text-center mt-8 text-slate-500 text-[10px] font-mono uppercase tracking-[0.4em]"
+          className="text-center mt-8 text-slate-600 text-[10px] font-mono uppercase tracking-[0.4em]"
         >
           Secure Terminal v2.04 • Ahmad Zaheer
         </motion.p>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { motion } from 'framer-motion'; 
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'; 
 import { FiGithub, FiExternalLink, FiLayers } from 'react-icons/fi';
 
 const ProjectSkeleton = () => (
@@ -15,6 +15,100 @@ const ProjectSkeleton = () => (
     </div>
   </div>
 );
+
+// --- WOW FACTOR: Interactive Card Component ---
+const ProjectCard = ({ project, index, ASSET_URL, formatLink }) => {
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const mouseX = useSpring(x, { stiffness: 500, damping: 50 });
+  const mouseY = useSpring(y, { stiffness: 500, damping: 50 });
+
+  function onMouseMove({ currentTarget, clientX, clientY }) {
+    const { left, top } = currentTarget.getBoundingClientRect();
+    x.set(clientX - left);
+    y.set(clientY - top);
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: index * 0.1 }}
+      viewport={{ once: true }}
+      onMouseMove={onMouseMove}
+      className="group relative bg-[#0f172a]/40 backdrop-blur-md border border-white/5 rounded-[2.5rem] overflow-hidden hover:border-purple-500/40 transition-all duration-500 shadow-2xl flex flex-col"
+    >
+      {/* WOW FACTOR: Mouse-following radial glow */}
+      <motion.div
+        className="pointer-events-none absolute -inset-px rounded-[2.5rem] opacity-0 transition duration-300 group-hover:opacity-100"
+        style={{
+          background: useTransform(
+            [mouseX, mouseY],
+            ([x, y]) => `radial-gradient(400px circle at ${x}px ${y}px, rgba(168, 85, 247, 0.15), transparent 80%)`
+          ),
+        }}
+      />
+
+      {/* Image Container */}
+      <div className="relative h-64 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-transparent to-transparent opacity-80 z-10" />
+        <motion.img 
+          whileHover={{ scale: 1.1 }}
+          transition={{ duration: 0.7 }}
+          src={project.image?.startsWith('http') ? project.image : `${ASSET_URL}${project.image}`} 
+          alt={project.title} 
+          className="w-full h-full object-cover"
+          onError={(e) => { e.target.src = "https://placehold.co/600x400/1e293b/a855f7?text=Project+Preview"; }}
+        />
+        <div className="absolute top-5 right-5 z-20">
+           <span className="px-4 py-1.5 bg-purple-600 text-white rounded-xl text-[10px] font-black uppercase tracking-tighter shadow-[0_0_15px_rgba(168,85,247,0.4)]">
+             {project.techStack?.[0] || 'Web App'}
+           </span>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="p-8 flex flex-col flex-grow relative z-10">
+        <h3 className="text-2xl font-black mb-3 group-hover:text-purple-400 transition-colors tracking-tight text-white">
+          {project.title}
+        </h3>
+        <p className="text-slate-400 text-sm leading-relaxed mb-6 line-clamp-3 min-h-[4.5rem] font-medium">
+          {project.description}
+        </p>
+
+        <div className="flex flex-wrap gap-2 mb-8 mt-auto">
+          {project.techStack && project.techStack.map((tech, i) => (
+            <span key={i} className="text-[10px] uppercase tracking-widest font-black px-3 py-1.5 bg-purple-500/5 text-purple-300 border border-purple-500/10 rounded-lg group-hover:bg-purple-500/20 group-hover:border-purple-500/30 transition-all">
+              {tech}
+            </span>
+          ))}
+        </div>
+
+        <div className="flex items-center justify-between pt-6 border-t border-white/5">
+          <motion.a 
+            whileHover={{ x: 3 }}
+            href={formatLink(project.githubLink)} 
+            target="_blank" 
+            rel="noreferrer"
+            className="flex items-center gap-2 text-slate-400 hover:text-white transition-all font-bold text-xs uppercase tracking-widest"
+          >
+            <FiGithub className="text-lg" /> Code
+          </motion.a>
+          <motion.a 
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            href={formatLink(project.liveLink)} 
+            target="_blank" 
+            rel="noreferrer"
+            className="flex items-center gap-2 text-purple-400 hover:text-white transition-all font-black text-xs uppercase tracking-widest bg-purple-500/10 hover:bg-purple-600 px-5 py-2.5 rounded-xl border border-purple-500/20 shadow-lg"
+          >
+            Launch <FiExternalLink />
+          </motion.a>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
 
 const Projects = () => {
   const [projects, setProjects] = useState([]);
@@ -44,7 +138,6 @@ const Projects = () => {
 
   return (
     <section id="projects" className="py-24 bg-[#020617] text-white px-6 relative overflow-hidden">
-      {/* Background Decorative Blur - Updated to Purple */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-96 bg-purple-600/10 blur-[120px] rounded-full -z-10" />
 
       <div className="max-w-7xl mx-auto">
@@ -71,68 +164,13 @@ const Projects = () => {
           ) : (
             projects.length > 0 ? (
               projects.map((project, index) => (
-                <motion.div
-                  key={project._id}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                  whileHover={{ y: -10 }}
-                  className="group bg-[#0f172a]/40 backdrop-blur-md border border-white/5 rounded-[2.5rem] overflow-hidden hover:border-purple-500/40 transition-all duration-500 shadow-2xl flex flex-col"
-                >
-                  {/* Image Container */}
-                  <div className="relative h-64 overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-transparent to-transparent opacity-80 z-10" />
-                    <img 
-                      src={project.image?.startsWith('http') ? project.image : `${ASSET_URL}${project.image}`} 
-                      alt={project.title} 
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                      onError={(e) => { e.target.src = "https://placehold.co/600x400/1e293b/a855f7?text=Project+Preview"; }}
-                    />
-                    <div className="absolute top-5 right-5 z-20">
-                       <span className="px-4 py-1.5 bg-purple-600 text-white rounded-xl text-[10px] font-black uppercase tracking-tighter shadow-[0_0_15px_rgba(168,85,247,0.4)]">
-                         {project.techStack?.[0] || 'Web App'}
-                       </span>
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <div className="p-8 flex flex-col flex-grow">
-                    <h3 className="text-2xl font-black mb-3 group-hover:text-purple-400 transition-colors tracking-tight text-white">
-                      {project.title}
-                    </h3>
-                    <p className="text-slate-400 text-sm leading-relaxed mb-6 line-clamp-3 min-h-[4.5rem] font-medium">
-                      {project.description}
-                    </p>
-
-                    <div className="flex flex-wrap gap-2 mb-8 mt-auto">
-                      {project.techStack && project.techStack.map((tech, i) => (
-                        <span key={i} className="text-[10px] uppercase tracking-widest font-black px-3 py-1.5 bg-purple-500/5 text-purple-300 border border-purple-500/10 rounded-lg group-hover:bg-purple-500/10 transition-all">
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
-
-                    <div className="flex items-center justify-between pt-6 border-t border-white/5">
-                      <a 
-                        href={formatLink(project.githubLink)} 
-                        target="_blank" 
-                        rel="noreferrer"
-                        className="flex items-center gap-2 text-slate-400 hover:text-white transition-all font-bold text-xs uppercase tracking-widest"
-                      >
-                        <FiGithub className="text-lg" /> Code
-                      </a>
-                      <a 
-                        href={formatLink(project.liveLink)} 
-                        target="_blank" 
-                        rel="noreferrer"
-                        className="flex items-center gap-2 text-purple-400 hover:text-white transition-all font-black text-xs uppercase tracking-widest bg-purple-500/10 hover:bg-purple-600 px-5 py-2.5 rounded-xl border border-purple-500/20 shadow-lg shadow-purple-900/20"
-                      >
-                        Launch <FiExternalLink />
-                      </a>
-                    </div>
-                  </div>
-                </motion.div>
+                <ProjectCard 
+                  key={project._id} 
+                  project={project} 
+                  index={index} 
+                  ASSET_URL={ASSET_URL} 
+                  formatLink={formatLink} 
+                />
               ))
             ) : (
               <div className="col-span-full text-center py-32 bg-slate-900/20 rounded-[3rem] border-2 border-dashed border-white/5">

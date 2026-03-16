@@ -37,8 +37,8 @@ const Experience = () => {
           viewport={{ once: true }}
           className="w-full text-center mb-20 flex flex-col items-center"
         >
-          <div className="inline-block px-4 py-1.5 mb-4 rounded-full border border-purple-500/30 bg-purple-500/10 text-purple-400 text-xs font-bold uppercase tracking-widest">
-            Career Path
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-6 rounded-full border border-purple-500/30 bg-purple-500/10 text-purple-400 text-[10px] font-black uppercase tracking-[0.3em]">
+            <FiActivity size={12} className="animate-pulse" /> Career Protocol
           </div>
           <h2 className="text-4xl md:text-6xl font-black mb-6 bg-gradient-to-r from-white via-purple-200 to-purple-500 bg-clip-text text-transparent">
             Professional Experience

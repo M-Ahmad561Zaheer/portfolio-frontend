@@ -18,7 +18,6 @@ const Contact = () => {
       if (res.status === 200 || res.status === 201) {
         setStatus({ loading: false, success: true, error: null });
         setFormData({ name: '', email: '', subject: 'Portfolio Inquiry', message: '' });
-        // Success message disappears after 5 seconds
         setTimeout(() => setStatus(prev => ({ ...prev, success: false })), 5000);
       }
     } catch (err) {
@@ -32,8 +31,8 @@ const Contact = () => {
 
   return (
     <section id="contact" className="py-16 md:py-32 bg-[#020617] px-4 md:px-6 relative overflow-hidden">
-      {/* Background Decorative Blur */}
-      <div className="absolute top-0 right-0 w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-blue-600/10 blur-[100px] md:blur-[150px] rounded-full -z-10 animate-pulse" />
+      {/* --- WOW FACTOR: Synced Purple Background Pulse --- */}
+      <div className="absolute top-0 right-0 w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-purple-600/10 blur-[100px] md:blur-[150px] rounded-full -z-10 animate-pulse" />
 
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-20 items-center">
         
@@ -45,12 +44,12 @@ const Contact = () => {
           transition={{ duration: 0.6 }}
           className="text-center md:text-left"
         >
-          <div className="inline-block px-4 py-1.5 mb-6 rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-400 text-xs font-bold uppercase tracking-[0.2em]">
+          <div className="inline-block px-4 py-1.5 mb-6 rounded-full border border-purple-500/30 bg-purple-500/10 text-purple-400 text-xs font-bold uppercase tracking-[0.2em]">
             Get In Touch
           </div>
           <h2 className="text-4xl sm:text-5xl md:text-7xl font-black text-white mb-6 leading-[1.1]">
             Let's build something <br />
-            <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-emerald-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-purple-400 via-indigo-400 to-purple-600 bg-clip-text text-transparent">
               Extraordinary.
             </span>
           </h2>
@@ -60,10 +59,14 @@ const Contact = () => {
           
           <div className="space-y-6 text-left max-w-sm mx-auto md:mx-0">
             {[
-              { icon: <FiMail />, title: 'Email Me', value: 'ahmedzaheer2004.24@gmail.com', color: 'text-blue-400', bg: 'border-blue-500/20' },
-              { icon: <FiMapPin />, title: 'Location', value: 'Lahore, Pakistan', color: 'text-emerald-400', bg: 'border-emerald-500/20' }
+              { icon: <FiMail />, title: 'Email Me', value: 'ahmedzaheer2004.24@gmail.com', color: 'text-purple-400', bg: 'border-purple-500/20' },
+              { icon: <FiMapPin />, title: 'Location', value: 'Lahore, Pakistan', color: 'text-indigo-400', bg: 'border-indigo-500/20' }
             ].map((info, i) => (
-              <div key={i} className="flex items-center gap-5 group">
+              <motion.div 
+                key={i} 
+                whileHover={{ x: 10 }}
+                className="flex items-center gap-5 group cursor-default"
+              >
                 <div className={`w-14 h-14 bg-slate-900 flex items-center justify-center rounded-2xl border border-slate-800 group-hover:${info.bg} transition-all duration-300 shadow-xl`}>
                   <span className={`${info.color} text-xl`}>{info.icon}</span>
                 </div>
@@ -71,12 +74,12 @@ const Contact = () => {
                   <p className="text-[10px] text-slate-500 uppercase tracking-widest font-black mb-1">{info.title}</p>
                   <p className="text-white font-semibold text-base md:text-lg break-all">{info.value}</p>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </motion.div>
 
-        {/* Right Side: Form */}
+        {/* Right Side: Form with "Wow" interaction */}
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
@@ -95,7 +98,7 @@ const Contact = () => {
                 placeholder="Full Name" 
                 value={formData.name}
                 onChange={(e) => setFormData({...formData, name: e.target.value})}
-                className="w-full bg-slate-800/50 border border-slate-700/50 p-4 rounded-2xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all text-white placeholder:text-slate-500" 
+                className="w-full bg-slate-800/50 border border-slate-700/50 p-4 rounded-2xl focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all text-white placeholder:text-slate-500 hover:border-white/10" 
               />
               <input 
                 required
@@ -103,7 +106,7 @@ const Contact = () => {
                 placeholder="Email Address" 
                 value={formData.email}
                 onChange={(e) => setFormData({...formData, email: e.target.value})}
-                className="w-full bg-slate-800/50 border border-slate-700/50 p-4 rounded-2xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all text-white placeholder:text-slate-500" 
+                className="w-full bg-slate-800/50 border border-slate-700/50 p-4 rounded-2xl focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all text-white placeholder:text-slate-500 hover:border-white/10" 
               />
             </div>
             
@@ -113,15 +116,17 @@ const Contact = () => {
               rows="5" 
               value={formData.message}
               onChange={(e) => setFormData({...formData, message: e.target.value})}
-              className="w-full bg-slate-800/50 border border-slate-700/50 p-4 rounded-2xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all text-white resize-none placeholder:text-slate-500"
+              className="w-full bg-slate-800/50 border border-slate-700/50 p-4 rounded-2xl focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all text-white resize-none placeholder:text-slate-500 hover:border-white/10"
             ></textarea>
 
-            <button 
+            <motion.button 
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               disabled={status.loading}
               className={`w-full py-4 rounded-2xl font-black uppercase tracking-widest text-sm flex items-center justify-center gap-3 transition-all duration-500 ${
                 status.success 
                 ? 'bg-emerald-500 text-white shadow-emerald-500/20' 
-                : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-500/25 hover:-translate-y-1'
+                : 'bg-purple-600 hover:bg-purple-500 text-white shadow-purple-500/25'
               } disabled:opacity-70 disabled:cursor-not-allowed`}
             >
               {status.loading ? (
@@ -131,11 +136,13 @@ const Contact = () => {
                   <FiCheckCircle className="text-xl" /> Sent Successfully
                 </motion.div>
               ) : (
-                <><FiSend className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" /> Send Message</>
+                <div className="flex items-center gap-2 group">
+                  <FiSend className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" /> 
+                  <span>Send Message</span>
+                </div>
               )}
-            </button>
+            </motion.button>
 
-            {/* Error Message with Animation */}
             <AnimatePresence>
               {status.error && (
                 <motion.div 

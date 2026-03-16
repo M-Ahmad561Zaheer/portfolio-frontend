@@ -1,46 +1,70 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { FiDownload, FiArrowRight, FiGithub, FiLinkedin } from 'react-icons/fi';
 
 const Hero = () => {
+  // --- WOW FACTOR: Interactive Spotlight Effect ---
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  const handleMouseMove = ({ clientX, clientY, currentTarget }) => {
+    const { left, top } = currentTarget.getBoundingClientRect();
+    mouseX.set(clientX - left);
+    mouseY.set(clientY - top);
+  };
+
   return (
-    <section id="home" className="relative min-h-screen flex items-center justify-center bg-[#020617] overflow-hidden px-6">
+    <section 
+      id="home" 
+      onMouseMove={handleMouseMove}
+      className="relative min-h-screen flex items-center justify-center bg-[#020617] overflow-hidden px-6 group/section"
+    >
       
-      {/* --- BACKGROUND DECORATIVE ELEMENTS --- */}
-      <div className="absolute top-20 left-10 w-72 h-72 bg-blue-600/10 blur-[120px] rounded-full animate-pulse -z-10" />
-      <div className="absolute bottom-20 right-10 w-72 h-72 bg-purple-600/5 blur-[120px] rounded-full animate-pulse -z-10" />
+      {/* --- WOW FACTOR: Dynamic Background Spotlight --- */}
+      <motion.div
+        className="pointer-events-none absolute -inset-px rounded-xl opacity-0 transition duration-300 group-hover/section:opacity-100"
+        style={{
+          background: useMotionValue(
+            `radial-gradient(600px circle at ${mouseX}px ${mouseY}px, rgba(37, 99, 235, 0.15), transparent 80%)`
+          ),
+        }}
+      />
       
       <div className="max-w-7xl mx-auto flex flex-col items-center text-center z-10">
         
         {/* Intro Badge */}
         <motion.div 
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="px-4 py-2 rounded-full bg-blue-500/5 border border-blue-500/20 text-blue-400 text-[10px] md:text-xs font-black tracking-[0.2em] uppercase mb-8 backdrop-blur-md"
         >
           🚀 Available for New Projects
         </motion.div>
 
-        {/* Main Heading */}
+        {/* Main Heading with Staggered Entrance */}
         <motion.h1 
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
           className="text-4xl sm:text-6xl md:text-8xl font-black text-white tracking-tighter mb-8 leading-[1.1]"
         >
           Building Digital <br />
-          <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">
+          <motion.span 
+            initial={{ backgroundPosition: "200% center" }}
+            animate={{ backgroundPosition: "0% center" }}
+            transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
+            className="bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-[length:200%_auto] bg-clip-text text-transparent"
+          >
             Masterpieces.
-          </span>
+          </motion.span>
         </motion.h1>
 
         {/* Description */}
         <motion.p 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1, delay: 0.5 }}
           className="text-slate-400 text-base md:text-xl max-w-3xl leading-relaxed mb-12 mx-auto"
         >
           I am a <span className="text-blue-400 font-bold">Full-Stack Developer</span> dedicated to 
@@ -50,44 +74,52 @@ const Hero = () => {
         </motion.p>
 
         {/* Call to Action Buttons */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.6 }}
-          className="flex flex-col sm:flex-row justify-center gap-5 mb-16 w-full sm:w-auto"
-        >
-          <a 
+        <div className="flex flex-col sm:flex-row justify-center gap-5 mb-16 w-full sm:w-auto">
+          <motion.a 
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             href="#projects" 
-            className="group bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-sm transition-all flex items-center justify-center gap-2 shadow-2xl shadow-blue-900/40 active:scale-95"
+            className="group bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-sm transition-all flex items-center justify-center gap-2 shadow-2xl shadow-blue-900/40"
           >
             Explore My Work 
             <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
-          </a>
+          </motion.a>
           
-          <a 
-            href="/Ahmad_CV.pdf"  /* ✅ Direct public folder se access */
+          <motion.a 
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            href="/Ahmad_CV.pdf"
             target="_blank" 
             rel="noopener noreferrer"
             download="Ahmad_CV.pdf" 
-            className="bg-slate-900 hover:bg-slate-800 text-white border border-white/10 px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-sm transition-all flex items-center justify-center gap-2 shadow-lg cursor-pointer active:scale-95"
+            className="bg-slate-900 hover:bg-slate-800 text-white border border-white/10 px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-sm transition-all flex items-center justify-center gap-2 shadow-lg"
           >
             Download CV <FiDownload className="group-hover:translate-y-0.5 transition-transform" />
-          </a>
-        </motion.div>
+          </motion.a>
+        </div>
 
         {/* Social Links */}
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 0.8 }}
+          transition={{ delay: 1 }}
           className="flex gap-10 text-slate-500"
         >
-          <a href="https://github.com/M-Ahmad561Zaheer" target="_blank" rel="noreferrer" className="hover:text-white hover:scale-125 transition-all duration-300">
-            <FiGithub size={24} />
-          </a>
-          <a href="https://linkedin.com/in/ahmad561" target="_blank" rel="noreferrer" className="hover:text-blue-400 hover:scale-125 transition-all duration-300">
-            <FiLinkedin size={24} />
-          </a>
+          {[
+            { Icon: FiGithub, link: "https://github.com/M-Ahmad561Zaheer" },
+            { Icon: FiLinkedin, link: "https://linkedin.com/in/ahmad561" }
+          ].map((item, idx) => (
+            <motion.a 
+              key={idx}
+              whileHover={{ y: -5, color: "#fff" }}
+              href={item.link} 
+              target="_blank" 
+              rel="noreferrer" 
+              className="transition-colors duration-300"
+            >
+              <item.Icon size={24} />
+            </motion.a>
+          ))}
         </motion.div>
       </div>
 
