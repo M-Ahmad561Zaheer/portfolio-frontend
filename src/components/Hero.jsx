@@ -32,16 +32,7 @@ const Hero = () => {
       
       <div className="max-w-7xl mx-auto flex flex-col items-center text-center z-10">
         
-        {/* Intro Badge */}
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="px-4 py-2 rounded-full bg-blue-500/5 border border-blue-500/20 text-blue-400 text-[10px] md:text-xs font-black tracking-[0.2em] uppercase mb-8 backdrop-blur-md"
-        >
-          🚀 Available for New Projects
-        </motion.div>
-
+       
         {/* Main Heading with Staggered Entrance */}
         <motion.h1 
           initial={{ opacity: 0, y: 30 }}
@@ -73,31 +64,32 @@ const Hero = () => {
           bold ideas and high-performance software.
         </motion.p>
 
-        {/* Call to Action Buttons */}
-        <div className="flex flex-col sm:flex-row justify-center gap-5 mb-16 w-full sm:w-auto">
-          <motion.a 
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            href="#projects" 
-            className="group bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-sm transition-all flex items-center justify-center gap-2 shadow-2xl shadow-blue-900/40"
-          >
-            Explore My Work 
-            <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
-          </motion.a>
-          
-          <motion.a 
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            href="/Ahmad_CV.pdf"
-            target="_blank" 
-            rel="noopener noreferrer"
-            download="Ahmad_CV.pdf" 
-            className="bg-slate-900 hover:bg-slate-800 text-white border border-white/10 px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-sm transition-all flex items-center justify-center gap-2 shadow-lg"
-          >
-            Download CV <FiDownload className="group-hover:translate-y-0.5 transition-transform" />
-          </motion.a>
-        </div>
-
+ {/* Call to Action Buttons */}
+<div className="flex flex-col sm:flex-row justify-center gap-6 mb-20 w-full sm:w-auto">
+  {/* Primary Action: Launch Projects */}
+  <motion.a 
+    whileHover={{ scale: 1.05, y: -2 }}
+    whileTap={{ scale: 0.95 }}
+    href="#projects" 
+    className="group bg-purple-600 text-black px-10 py-5 rounded-2xl font-black uppercase tracking-widest text-xs transition-all flex items-center justify-center gap-3 shadow-[0_0_30px_rgba(255,255,255,0.15)] hover:shadow-purple-500/20"
+  >
+    Launch Projects 
+    <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
+  </motion.a>
+  
+  {/* Secondary Action: Download CV */}
+  <motion.a 
+    whileHover={{ scale: 1.05, y: -2 }}
+    whileTap={{ scale: 0.95 }}
+    href="/Ahmad_CV.pdf"
+    target="_blank"
+    download
+    className="group bg-transparent hover:bg-white/5 text-white border border-white/10 px-10 py-5 rounded-2xl font-black uppercase tracking-widest text-xs transition-all flex items-center justify-center gap-3"
+  >
+    Download Protocol 
+    <FiDownload className="text-purple-500 group-hover:animate-bounce" />
+  </motion.a>
+</div>
         {/* Social Links */}
         <motion.div 
           initial={{ opacity: 0 }}
@@ -112,7 +104,7 @@ const Hero = () => {
             <motion.a 
               key={idx}
               whileHover={{ y: -5, color: "#fff" }}
-              href={item.link} 
+              href={item.link}  
               target="_blank" 
               rel="noreferrer" 
               className="transition-colors duration-300"
