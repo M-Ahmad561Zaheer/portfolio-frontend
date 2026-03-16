@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { 
   SiReact, SiMongodb, SiNodedotjs, 
-  SiTailwindcss, SiJavascript, SiMysql, SiCplusplus, 
+  SiJavascript, SiMysql, SiCplusplus, 
   SiOpenjdk 
 } from 'react-icons/si';
 import { TbBrandCSharp } from 'react-icons/tb';
@@ -21,11 +21,11 @@ const About = () => {
 
   return (
     <section id="about" className="py-32 bg-[#020617] text-white px-6 relative overflow-hidden">
-      {/* Background Decorative Blobs - Synced to Purple */}
-      <div className="absolute top-1/2 left-0 w-96 h-96 bg-purple-600/10 blur-[130px] rounded-full -translate-y-1/2 -z-0" />
+      {/* Background Decorative Blobs */}
+      <div className="absolute top-1/2 left-0 w-[500px] h-[500px] bg-purple-600/5 blur-[150px] rounded-full -translate-y-1/2 -z-0" />
       
       <div className="max-w-6xl mx-auto relative z-10">
-        <div className="grid lg:grid-cols-2 gap-16 items-start">
+        <div className="grid lg:grid-cols-2 gap-20 items-center">
           
           <motion.div
             initial={{ opacity: 0, x: -50 }}
@@ -33,53 +33,68 @@ const About = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
           >
-            <div className="inline-block px-4 py-1.5 mb-6 rounded-full border border-purple-500/30 bg-purple-500/10 text-purple-400 text-xs font-bold uppercase tracking-widest">
-              My Expertise
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-8 rounded-full border border-purple-500/30 bg-purple-500/10 text-purple-400 text-[10px] font-black uppercase tracking-[0.3em]">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
+              </span>
+              Identity Protocol
             </div>
-            <h2 className="text-4xl md:text-6xl font-black mb-8 leading-[1.1] bg-gradient-to-br from-white via-slate-200 to-slate-500 bg-clip-text text-transparent">
+            
+            <h2 className="text-5xl md:text-7xl font-black mb-8 leading-[0.9] bg-gradient-to-br from-white via-slate-200 to-slate-500 bg-clip-text text-transparent tracking-tighter">
               Tech Explorer & <br /> 
               <span className="text-purple-500">Problem Solver.</span>
             </h2>
-            <p className="text-slate-400 text-lg mb-8 leading-relaxed max-w-xl">
-              I am a Full-Stack Developer with a solid foundation in Computer Science. 
-              Beyond the MERN stack, I build systems with <span className="text-white font-semibold underline decoration-purple-500/50">C++</span> and enterprise logic in <span className="text-white font-semibold underline decoration-purple-500/50">Java/C#</span>. 
+            
+            <p className="text-slate-400 text-lg mb-10 leading-relaxed max-w-xl font-medium">
+              I am a Full-Stack Developer with a deep-rooted passion for architecting scalable systems. 
+              Currently in my <span className="text-white font-bold italic">7th Semester at UCP</span>, 
+              I specialize in the MERN stack while bridging the gap between high-level web logic and 
+              low-level performance with <span className="text-purple-400">C++</span> and <span className="text-purple-400">Java</span>.
             </p>
+
+            {/* Micro-Stats Bar */}
+            <div className="flex gap-8 border-t border-white/5 pt-10">
+              <div>
+                <h4 className="text-3xl font-black text-white">20+</h4>
+                <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Projects</p>
+              </div>
+              <div className="w-px h-10 bg-slate-800" />
+              <div>
+                <h4 className="text-3xl font-black text-white">03+</h4>
+                <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Years Coding</p>
+              </div>
+            </div>
           </motion.div>
 
-          {/* --- WOW FACTOR: Grid with Hover Effects --- */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
+          {/* Skill Grid with 3D Interaction */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {skills.map((skill, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ 
-                  duration: 0.5, 
-                  delay: index * 0.1,
-                  type: "spring",
-                  stiffness: 260,
-                  damping: 20 
-                }}
+                transition={{ duration: 0.4, delay: index * 0.05 }}
                 whileHover={{ 
-                  y: -10,
-                  rotateX: 10,
-                  rotateY: 10,
-                  transition: { duration: 0.2 }
+                  y: -8,
+                  rotateX: 5,
+                  rotateY: 5,
                 }}
-                className={`group relative p-6 bg-slate-900/40 backdrop-blur-md border border-white/5 rounded-3xl flex flex-col items-center justify-center gap-4 hover:border-purple-500/40 transition-all duration-300 shadow-2xl ${skill.glow} perspective-1000`}
+                className={`group relative p-8 bg-[#0f172a]/40 backdrop-blur-xl border border-white/5 rounded-[2rem] flex flex-col items-center justify-center gap-4 hover:border-purple-500/40 transition-all duration-300 shadow-2xl ${skill.glow}`}
               >
-                {/* Skill Icon */}
-                <div className={`text-5xl text-slate-600 transition-all duration-500 transform group-hover:scale-110 z-10 ${skill.color}`}>
+                {/* Icon with Dynamic Color */}
+                <div className={`text-5xl text-slate-700 transition-all duration-500 transform group-hover:scale-110 z-10 ${skill.color} drop-shadow-xl`}>
                   {skill.icon}
                 </div>
-                {/* Skill Name */}
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 group-hover:text-white z-10 transition-colors">
+                
+                {/* Label */}
+                <span className="text-[9px] font-black uppercase tracking-[0.25em] text-slate-500 group-hover:text-white z-10 transition-colors">
                   {skill.name}
                 </span>
-                
-                {/* Subtle Background Glow on Hover */}
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl" />
+
+                {/* Hover Ambient Light */}
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-[2rem]" />
               </motion.div>
             ))}
           </div>
