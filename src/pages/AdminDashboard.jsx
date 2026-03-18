@@ -8,6 +8,7 @@ import StatsBar from './StatsBar';
 import ItemForm from './ItemForm';
 import ItemList from './ItemList';
 import MessagesPanel from './MessagesPanel';
+import ProjectCharts from './ProjectCharts';
 
 const AdminDashboard = () => {
   const [type, setType] = useState('projects');
@@ -149,6 +150,9 @@ const AdminDashboard = () => {
         
         {/* TOP LEVEL TELEMETRY */}
         <StatsBar items={items} messages={messages} />
+
+        {/* Add the Chart here */}
+        <ProjectCharts items={items} />
 
         {/* SECTION HEADER */}
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
