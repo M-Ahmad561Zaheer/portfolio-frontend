@@ -1,21 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  FiGrid, FiBookOpen, FiBriefcase, FiMail, FiPlus, 
-  FiTrash2, FiEdit, FiActivity, FiLogOut, FiSearch, 
-  FiCheckCircle, FiTrendingUp, FiLayers, FiSend, FiX, FiMenu 
-} from 'react-icons/fi';
+import { FiSearch, FiRefreshCcw, FiActivity, FiTerminal } from 'react-icons/fi';
 
-// Global API instance (Best Practice)
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-  withCredentials: true 
-});
+import api from '../api/api';
+import Sidebar from './Sidebar';
+import StatsBar from './StatsBar';
+import ItemForm from './ItemForm';
+import ItemList from './ItemList';
+import MessagesPanel from './MessagesPanel';
 
 const AdminDashboard = () => {
   const [type, setType] = useState('projects');
-  const [formData, setFormData] = useState({}); 
+  const [formData, setFormData] = useState({});
   const [items, setItems] = useState([]);
   const [messages, setMessages] = useState([]);
   const [editId, setEditId] = useState(null);
@@ -35,25 +31,23 @@ const AdminDashboard = () => {
         api.get(`/${type}`),
         api.get(`/messages`)
       ]);
-
       setItems(Array.isArray(dataRes.data) ? dataRes.data : dataRes.data.data || []);
       setMessages(Array.isArray(msgRes.data) ? msgRes.data : msgRes.data.messages || []);
     } catch (err) {
       console.error("Fetch Error:", err);
-      // Agar cookie expire ho jaye toh automatic logout/alert
-      if(err.response?.status === 401) {
-        alert("Session Expired! Login again.");
+      if (err.response?.status === 401) {
         window.location.href = "/login";
       }
     } finally {
-      setLoading(false);
+      // Small timeout to prevent flicker on fast connections
+      setTimeout(() => setLoading(false), 500);
     }
   };
 
   useEffect(() => {
     fetchData();
     setEditId(null);
-    setFormData({}); // Reset form when switching tabs
+    setFormData({});
   }, [type]);
 
   // 2. Handle Edit
@@ -67,60 +61,52 @@ const AdminDashboard = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // 3. Handle Submit (Refined)
+  // 3. Handle Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    // Deep copy to avoid mutating state
     let finalData = { ...formData };
-    
-    // TechStack string to Array conversion
     if (finalData.techStack && typeof finalData.techStack === 'string') {
       finalData.techStack = finalData.techStack.split(',').map(item => item.trim());
     }
-    
-    // Rating string to Number
     if (type === 'reviews' && finalData.rating) {
       finalData.rating = Number(finalData.rating);
     }
 
     try {
       if (editId) {
-        await api.put(`/${type}/${editId}`, finalData); 
+        await api.put(`/${type}/${editId}`, finalData);
       } else {
         await api.post(`/${type}`, finalData);
       }
-      
-      alert("Success! Database Updated ✅");
-      setEditId(null); 
-      setFormData({}); 
+      setEditId(null);
+      setFormData({});
       fetchData();
-    } catch (err) { 
-      alert(err.response?.data?.message || "Error saving data"); 
-    } finally {
+    } catch (err) {
+      alert(err.response?.data?.message || "Error saving data");
       setLoading(false);
     }
   };
 
-  // 4. Delete & Reply
+  // 4. Delete
   const handleDelete = async (id, deleteType = type) => {
-    if (window.confirm("Permanent Delete?")) {
+    if (window.confirm("Permanent Purge? This cannot be undone.")) {
       try {
         await api.delete(`/${deleteType}/${id}`);
         fetchData();
-      } catch (err) { alert("Delete failed"); }
+      } catch (err) { alert("Purge failed"); }
     }
   };
 
+  // 5. Send Reply
   const handleSendReply = async (id, email, subject) => {
-    if (!replyText) return alert("Write something!");
+    if (!replyText) return;
     setSendingReply(true);
     try {
-      await api.post(`/messages/reply`, { 
-        id, to: email, subject: `Re: ${subject}`, message: replyText 
+      await api.post(`/messages/reply`, {
+        id, to: email, subject: `Re: ${subject}`, message: replyText
       });
-      alert("Email Dispatched! 📧");
       setReplyId(null);
       setReplyText("");
       fetchData();
@@ -128,320 +114,140 @@ const AdminDashboard = () => {
     finally { setSendingReply(false); }
   };
 
-  // 5. Logout
-  const handleLogout = async () => {
-    try {
-      await api.post('/auth/logout');
-      localStorage.removeItem("isAdminAuthenticated");
-      window.location.href = "/login";
-    } catch (err) {
-      console.error("Logout failed", err);
-    }
-  };
-
-  const menuItems = [
-    { id: 'projects', label: 'Projects', icon: <FiGrid /> },
-    { id: 'experience', label: 'Experience', icon: <FiBriefcase /> },
-    { id: 'education', label: 'Education', icon: <FiBookOpen /> },
-    { id: 'messages', label: 'Messages', icon: <FiMail /> },
-    { id: 'reviews', label: 'Reviews', icon: <FiCheckCircle /> }
-  ];
-
   return (
-    <div className="flex min-h-screen bg-[#020617] text-slate-100 selection:bg-blue-500/30">
+    <div className="flex min-h-screen bg-[#020617] text-slate-100 selection:bg-cyan-500/30 font-sans overflow-x-hidden">
       
-      {/* MOBILE HEADER */}
-      <div className="lg:hidden fixed top-0 w-full bg-[#0b1120] border-b border-white/5 p-4 z-50 flex justify-between items-center">
-        <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold">A</div>
-            <span className="font-black tracking-tighter text-sm">ADMIN PANEL</span>
-        </div>
-        <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2 bg-white/5 rounded-lg">
-            {isSidebarOpen ? <FiX size={20}/> : <FiMenu size={20}/>}
-        </button>
-      </div>
+      {/* GLOBAL LOADING OVERLAY */}
+      <AnimatePresence>
+        {loading && (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-md flex flex-col items-center justify-center"
+          >
+             <div className="relative">
+                <div className="w-24 h-24 border-2 border-cyan-500/20 rounded-full animate-spin border-t-cyan-500" />
+                <FiTerminal className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-cyan-500 animate-pulse" size={30} />
+             </div>
+             <p className="mt-8 text-[10px] font-black uppercase tracking-[0.5em] text-cyan-500/50 animate-pulse">
+                Decrypting Matrix Data...
+             </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* SIDEBAR (Desktop & Mobile) */}
-      <aside className={`fixed lg:sticky top-0 h-screen w-72 bg-[#0b1120] border-r border-white/5 p-8 flex flex-col z-[60] transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
-        <div className="hidden lg:flex items-center gap-3 mb-12">
-          <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center font-black text-xl shadow-lg shadow-blue-600/20">A</div>
-          <h2 className="text-xl font-black tracking-widest text-white">CORE DB</h2>
-        </div>
+      <Sidebar
+        type={type}
+        setType={setType}
+        isSidebarOpen={isSidebarOpen}
+        setIsSidebarOpen={setIsSidebarOpen}
+      />
 
-        <nav className="space-y-2 flex-1 pt-16 lg:pt-0">
-          {menuItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => { setType(item.id); setIsSidebarOpen(false); }}
-              className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl font-bold text-sm uppercase tracking-widest transition-all ${type === item.id ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-slate-500 hover:text-white hover:bg-white/5'}`}
-            >
-              {item.icon} {item.label}
-            </button>
-          ))}
-        </nav>
-
-        <button onClick={() => { localStorage.removeItem("adminToken"); window.location.href="/"; }} className="flex items-center gap-3 p-4 text-slate-500 hover:text-red-400 font-bold text-xs uppercase tracking-widest transition-colors border-t border-white/5 pt-8">
-          <FiLogOut /> Termination Session
-        </button>
-      </aside>
-
-      {/* MAIN CONTENT */}
-      <main className="flex-1 p-6 lg:p-12 pt-24 lg:pt-12 max-w-7xl mx-auto w-full">
+      {/* MAIN CONTENT SPACE */}
+      <main className="flex-1 p-6 lg:p-12 xl:p-20 pt-28 lg:pt-20 max-w-[1600px] mx-auto w-full">
         
-        {/* DASHBOARD STATS */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-12">
-          {[
-            { label: 'Live Items', value: items.length, icon: <FiLayers />, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-            { label: 'Unread Mail', value: messages.filter(m => m.status !== 'Replied').length, icon: <FiMail />, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-            { label: 'Server', value: 'Active', icon: <FiActivity />, color: 'text-orange-500', bg: 'bg-orange-500/10' },
-            { label: 'Uptime', value: '99.9%', icon: <FiTrendingUp />, color: 'text-purple-500', bg: 'bg-purple-500/10' },
-          ].map((stat, idx) => (
-            <div key={idx} className="bg-[#0b1120] border border-white/5 p-6 rounded-3xl flex items-center gap-5">
-              <div className={`w-14 h-14 rounded-2xl ${stat.bg} ${stat.color} flex items-center justify-center text-2xl`}>{stat.icon}</div>
-              <div>
-                <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">{stat.label}</p>
-                <h3 className="text-2xl font-black">{stat.value}</h3>
-              </div>
-            </div>
-          ))}
-        </div>
+        {/* TOP LEVEL TELEMETRY */}
+        <StatsBar items={items} messages={messages} />
 
-        {/* HEADER AREA */}
-        <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
-          <div>
-            <h1 className="text-4xl lg:text-5xl font-black mb-2 uppercase tracking-tighter">{type}</h1>
-            <p className="text-slate-500 flex items-center gap-2 text-sm font-bold uppercase tracking-widest">
-                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-ping"></span> Syncing with Cloud
+        {/* SECTION HEADER */}
+        <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
+          <motion.div 
+            initial={{ x: -20, opacity: 0 }} 
+            animate={{ x: 0, opacity: 1 }}
+            key={type + "header"}
+          >
+            <div className="flex items-center gap-3 mb-4">
+               <div className="px-3 py-1 bg-cyan-500/10 border border-cyan-500/20 rounded-full">
+                  <span className="text-[9px] font-black text-cyan-500 uppercase tracking-widest">Active Node</span>
+               </div>
+               <div className="flex items-center gap-1.5">
+                  <FiActivity size={12} className="text-slate-600" />
+                  <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">v3.4.0-Stable</span>
+               </div>
+            </div>
+            <h1 className="text-5xl lg:text-7xl font-black mb-4 uppercase tracking-tighter italic bg-gradient-to-r from-white via-white to-white/20 bg-clip-text text-transparent">
+              {type}
+            </h1>
+            <p className="text-slate-500 flex items-center gap-3 text-xs font-bold uppercase tracking-[0.3em]">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span> 
+              Cloud Sync Active
             </p>
-          </div>
-          <div className="relative group">
-            <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
-            <input type="text" placeholder="Search entries..." className="bg-[#0b1120] border border-white/10 pl-12 pr-6 py-4 rounded-2xl w-full md:w-80 focus:ring-2 focus:ring-blue-600 outline-none transition-all" onChange={(e) => setSearchTerm(e.target.value)} />
+          </motion.div>
+
+          {/* HOLOGRAPHIC SEARCH */}
+          <div className="relative group w-full md:w-96">
+            <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500/20 to-transparent rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition duration-500" />
+            <div className="relative flex items-center">
+                <FiSearch className="absolute left-5 text-slate-500 group-focus-within:text-cyan-500 transition-colors" />
+                <input
+                  type="text"
+                  placeholder={`Search ${type}...`}
+                  className="bg-[#0b1120]/60 border border-white/5 pl-14 pr-6 py-5 rounded-2xl w-full focus:bg-[#0b1120] focus:border-cyan-500/50 outline-none transition-all text-sm font-medium placeholder:text-slate-600"
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                <button onClick={fetchData} className="absolute right-4 p-2 text-slate-600 hover:text-white transition-colors">
+                    <FiRefreshCcw size={16} className={loading ? "animate-spin" : ""} />
+                </button>
+            </div>
           </div>
         </header>
 
+        {/* CORE INTERFACE STACK */}
         <AnimatePresence mode="wait">
           {type !== 'messages' ? (
-            <motion.div key={type} initial={{opacity:0}} animate={{opacity:1}} className="grid grid-cols-1 xl:grid-cols-12 gap-10">
-              
-   {/* INPUT FORM */}
-{/* INPUT FORM */}
-<div className="xl:col-span-5">
-  <div className="bg-[#0b1120] border border-white/10 p-8 rounded-[2.5rem] shadow-2xl sticky top-12">
-    <h3 className="text-xl font-black mb-8 flex items-center gap-3">
-      <FiPlus className="text-blue-500" /> {editId ? "MODIFICATION" : `INITIALIZE ${type}`}
-    </h3>
-
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {type === 'reviews' ? (
-        /* REVIEWS FORM */
-        <div className="space-y-4">
-          <input 
-            required 
-            className="w-full bg-[#050816] border border-white/5 p-4 rounded-2xl outline-none focus:border-blue-500" 
-            placeholder="Client Name" 
-            value={formData.clientName || ''} 
-            onChange={(e) => setFormData({...formData, clientName: e.target.value})} 
-          />
-          <input 
-            className="w-full bg-[#050816] border border-white/5 p-4 rounded-2xl outline-none" 
-            placeholder="Client Role (e.g. CEO at TechHub)" 
-            value={formData.clientRole || ''} 
-            onChange={(e) => setFormData({...formData, clientRole: e.target.value})} 
-          />
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Rating (1-5)</label>
-            <input 
-              type="number" min="1" max="5" 
-              className="w-full bg-[#050816] border border-white/5 p-4 rounded-2xl outline-none" 
-              value={formData.rating || 5} 
-              onChange={(e) => setFormData({...formData, rating: e.target.value})} 
-            />
-          </div>
-          <textarea 
-            required 
-            className="w-full bg-[#050816] border border-white/5 p-4 rounded-2xl min-h-[100px] outline-none" 
-            placeholder="Client's Feedback..." 
-            value={formData.reviewText || ''} 
-            onChange={(e) => setFormData({...formData, reviewText: e.target.value})} 
-          />
-        </div>
-      ) : (
-        /* STANDARD FORM (Projects, Exp, Edu) */
-        <>
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">
-              {type === 'education' ? 'Academic Degree' : type === 'experience' ? 'Position/Role' : 'Project Identity'}
-            </label>
-            <input required className="w-full bg-[#050816] border border-white/5 p-4 rounded-2xl focus:border-blue-500 outline-none transition-all" 
-              value={formData.title || formData.role || formData.degree || ''}
-              onChange={(e) => {
-                const key = type === 'education' ? 'degree' : type === 'experience' ? 'role' : 'title';
-                setFormData({...formData, [key]: e.target.value});
-              }}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">
-              {type === 'education' ? 'Institution' : type === 'experience' ? 'Organization' : 'Tech Stack (Array)'}
-            </label>
-            <input required className="w-full bg-[#050816] border border-white/5 p-4 rounded-2xl focus:border-blue-500 outline-none" 
-              value={formData.institute || formData.company || formData.techStack || ''}
-              placeholder={type === 'projects' ? "React, Node.js, MongoDB" : ""}
-              onChange={(e) => {
-                const key = type === 'education' ? 'institute' : type === 'experience' ? 'company' : 'techStack';
-                setFormData({...formData, [key]: e.target.value});
-              }}
-            />
-          </div>
-
-          {type === 'projects' ? (
-            <div className="grid grid-cols-1 gap-4">
-              <input className="w-full bg-[#050816] border border-white/5 p-4 rounded-2xl text-sm outline-none" placeholder="GitHub URL" value={formData.githubLink || ''} onChange={(e) => setFormData({...formData, githubLink: e.target.value})} />
-              <input className="w-full bg-[#050816] border border-white/5 p-4 rounded-2xl text-sm outline-none" placeholder="Live URL" value={formData.liveLink || ''} onChange={(e) => setFormData({...formData, liveLink: e.target.value})} />
-              <input className="w-full bg-[#050816] border border-white/5 p-4 rounded-2xl text-sm outline-none" placeholder="Image URL" value={formData.image || ''} onChange={(e) => setFormData({...formData, image: e.target.value})} />
-            </div>
-          ) : (
-            <input className="w-full bg-[#050816] border border-white/5 p-4 rounded-2xl text-sm outline-none" placeholder="Time Interval" value={formData.duration || ''} onChange={(e) => setFormData({...formData, duration: e.target.value})} />
-          )}
-
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Contextual Info</label>
-            <textarea className="w-full bg-[#050816] border border-white/5 p-4 rounded-2xl min-h-[120px] outline-none" value={formData.description || ''} onChange={(e) => setFormData({...formData, description: e.target.value})} />
-          </div>
-        </>
-      )}
-
-      <button type="submit" className="w-full bg-blue-600 hover:bg-blue-500 py-5 rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl shadow-blue-600/20 transition-all active:scale-95">
-        {editId ? "Confirm Overwrite" : "Commit to Database"}
-      </button>
-      {editId && <button onClick={() => {setEditId(null); setFormData({});}} type="button" className="w-full bg-white/5 text-slate-400 py-3 rounded-2xl text-xs font-bold uppercase tracking-widest">Abort Edit</button>}
-    </form>
-  </div>
-</div>
-
-              {/* LIST DISPLAY */}
-   {/* LIST DISPLAY */}
-<div className="xl:col-span-7 space-y-6">
-  <h3 className="text-xl font-black mb-8 flex items-center gap-3">
-    <FiLayers className="text-blue-500" /> DATABASE ENTRIES
-  </h3>
-  
-  <div className="grid grid-cols-1 gap-4">
-    {items
-      .filter(i => (i.title || i.role || i.degree || i.clientName)?.toLowerCase().includes(searchTerm.toLowerCase()))
-      .map((item) => (
-        <div key={item._id} className="bg-[#0b1120] border border-white/5 p-6 rounded-[2rem] flex items-center justify-between group hover:border-blue-500/30 transition-all shadow-xl">
-          <div className="flex items-center gap-5">
-            <div className="w-12 h-12 bg-blue-600/10 rounded-2xl flex items-center justify-center text-blue-500 group-hover:scale-110 transition-transform">
-              <FiCheckCircle size={22}/>
-            </div>
-            <div>
-              <h4 className="font-black text-lg leading-tight mb-1">
-                {item.title || item.role || item.degree || item.clientName}
-              </h4>
-              <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">
-                {item.company || item.institute || item.clientRole || 'Public Project'}
-              </p>
-            </div>
-          </div>
-          
-          <div className="flex gap-3">
-            <button 
-              onClick={() => handleEdit(item)} 
-              className="p-3 bg-white/5 rounded-xl hover:bg-blue-600 hover:text-white transition-all"
-              title="Edit Entry"
+            <motion.div 
+              key={type + "grid"}
+              initial={{ opacity: 0, y: 20 }} 
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.4 }}
+              className="grid grid-cols-1 xl:grid-cols-12 gap-12"
             >
-              <FiEdit />
-            </button>
-            <button 
-              onClick={() => handleDelete(item._id)} 
-              className="p-3 bg-white/5 rounded-xl hover:bg-red-600 hover:text-white transition-all"
-              title="Delete Entry"
-            >
-              <FiTrash2 />
-            </button>
-          </div>
-        </div>
-    ))}
-
-    {items.length === 0 && (
-      <div className="text-center py-20 bg-[#0b1120] rounded-[3rem] border border-dashed border-white/10">
-        <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">No Records Found in {type}</p>
-      </div>
-    )}
-  </div>
-</div>
+              <ItemForm
+                type={type}
+                formData={formData}
+                setFormData={setFormData}
+                editId={editId}
+                setEditId={setEditId}
+                handleSubmit={handleSubmit}
+              />
+              <ItemList
+                type={type}
+                items={items}
+                searchTerm={searchTerm}
+                handleEdit={handleEdit}
+                handleDelete={handleDelete}
+              />
             </motion.div>
           ) : (
-            /* MESSAGES ENGINE */
-            <motion.div key="messages" initial={{opacity:0}} animate={{opacity:1}} className="space-y-6">
-              {messages.map((m) => (
-                <div key={m._id} className={`bg-[#0b1120] p-8 rounded-[3rem] border transition-all ${m.status === 'Replied' ? 'border-emerald-500/20' : 'border-white/5 shadow-2xl'}`}>
-                  <div className="flex flex-col md:flex-row justify-between items-start gap-6 mb-8">
-                    <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center font-black text-xl text-white shadow-lg">
-                        {m.name?.charAt(0)}
-                      </div>
-                      <div>
-                        <h4 className="text-xl font-black leading-none mb-1">{m.name}</h4>
-                        <p className="text-blue-500 text-xs font-bold uppercase tracking-widest">{m.email}</p>
-                      </div>
-                    </div>
-                    <div className="flex gap-3 items-center">
-                        <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${m.status === 'Replied' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-orange-500/10 text-orange-500'}`}>
-                            {m.status || 'Pending'}
-                        </span>
-                        <button onClick={() => handleDelete(m._id, 'messages')} className="p-2 text-slate-600 hover:text-red-500"><FiTrash2 size={20}/></button>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-[#050816] p-6 rounded-3xl border border-white/5 mb-6">
-                    <h5 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] mb-3">Transmission Content</h5>
-                    <p className="text-slate-300 leading-relaxed font-medium italic">"{m.message}"</p>
-                  </div>
-
-                  {m.replyText && (
-                    <div className="mb-6 p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-3xl">
-                        <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-2">Outbound Response</p>
-                        <p className="text-slate-400 text-sm italic">"{m.replyText}"</p>
-                    </div>
-                  )}
-
-                  <button 
-                    onClick={() => { setReplyId(replyId === m._id ? null : m._id); setReplyText(""); }}
-                    className={`flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${replyId === m._id ? 'bg-red-500/10 text-red-500' : 'bg-blue-600 text-white shadow-lg shadow-blue-900/40'}`}
-                  >
-                    {replyId === m._id ? <><FiX/> Close Terminal</> : <><FiSend/> Respond via Email</>}
-                  </button>
-
-                  <AnimatePresence>
-                    {replyId === m._id && (
-                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden mt-6">
-                        <textarea 
-                          className="w-full bg-[#050816] border-2 border-blue-500/20 p-6 rounded-[2rem] outline-none text-white text-sm focus:border-blue-500 transition-all"
-                          placeholder="Type your official response..."
-                          rows="5"
-                          value={replyText}
-                          onChange={(e) => setReplyText(e.target.value)}
-                        />
-                        <button 
-                          disabled={sendingReply}
-                          onClick={() => handleSendReply(m._id, m.email, m.subject)}
-                          className="mt-4 w-full bg-emerald-600 hover:bg-emerald-500 py-5 rounded-2xl font-black uppercase tracking-widest text-sm disabled:opacity-50 shadow-xl shadow-emerald-900/20"
-                        >
-                          {sendingReply ? "TRANSFUSING DATA..." : "AUTHORIZE & SEND EMAIL"}
-                        </button>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              ))}
+            <motion.div
+              key="messages-panel"
+              initial={{ opacity: 0, y: 20 }} 
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+            >
+              <MessagesPanel
+                messages={messages}
+                replyId={replyId}
+                setReplyId={setReplyId}
+                replyText={replyText}
+                setReplyText={setReplyText}
+                sendingReply={sendingReply}
+                handleDelete={handleDelete}
+                handleSendReply={handleSendReply}
+              />
             </motion.div>
           )}
         </AnimatePresence>
       </main>
+
+      {/* DECORATIVE AMBIENT GLOW */}
+      <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/5 blur-[120px] rounded-full pointer-events-none" />
+      <div className="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-cyan-600/5 blur-[120px] rounded-full pointer-events-none" />
     </div>
   );
 };
